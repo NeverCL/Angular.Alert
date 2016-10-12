@@ -8,12 +8,14 @@
     <script src="Scripts/jquery-1.9.1.js"></script>
     <script src="Scripts/angular.js"></script>
     <script src="Scripts/bootstrap.js"></script>
+    <script src="Scripts/angular-alert.js"></script>
 </head>
 <body ng-controller="helloCtrl">
-    <a href="#" msg="确认删除?" click="func1">删除</a>
+    <a href="#" alert="确认删除?" click="func1">删除</a>
+
     <script>
-        var app = angular.module('myApp', []);
-        app.controller('helloCtrl', function ($scope) {
+        angular.module('myApp', ['bs.alert']).controller('helloCtrl', function ($scope) {
+
         });
         angular.bootstrap(document, ['myApp']);
     </script>
