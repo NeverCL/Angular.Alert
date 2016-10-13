@@ -21,29 +21,67 @@
         .directive('alert', ['alertCfg', function (cfg) {
             return {
                 scope: {
-                    click: '&'
+                    func: '&'
                 },
-                template: '<div class="modal fade">' +
-                    '<div class="modal-dialog">' +
-                    '<div class="modal-content">' +
-                    '<div class="modal-header">' +
-                    '<button type="button" class="close" data-dismiss="modal">&times;</button>' +
-                    '<h4 class="modal-title">Modal title</h4>' +
-                    '</div>' +
-                    '<div class="modal-body">' +
-                    '<p>One fine body&hellip;</p>' +
-                    '</div>' +
-                    '<div class="modal-footer">' +
-                    '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>' +
-                    '<button type="button" class="btn btn-primary">Save changes</button>' +
-                    '</div>' +
-                    '</div><!-- /.modal-content -->' +
-                    '</div><!-- /.modal-dialog -->' +
-                    '</div><!-- /.modal -->',
                 link: alertLink
             };
-            function alertLink(scope, ele, attr) {
 
+            function alertLink(scope, ele, attr) {
+                ele.click(function () {
+                    clickFn(scope, attr);
+                });
+            }
+
+            function clickFn(scope, attr) {
+                var opt = attr;
+                opt.success = scope.func;
+                scope.alert = new Alert(opt);
+                scope.alert.show();
+                return false;
             }
         }]);
+
+    function Alert(opt) {
+        this.opt = opt;
+        this.$modal = {};
+        this.init();
+    }
+
+    Alert.prototype = {
+        defaults: {
+            msg: '确认删除?',
+            url: '',
+            successFn: null,
+            doneFn: function () {
+                modal.modal('hide');
+                $('.btn-default:contains("查询")').click();
+            }
+        },
+        init: function () {
+            var opt = $.extend(this.defaults, this.opt);
+            var modal = $('<div class="modal fade" style="margin-top: 10%;"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-body">' + opt.msg + '</div><div class="modal-footer"><a data-dismiss="modal" class="btn btn-default btn-sm">取消</a><button class="btn btn-primary btn-sm">确认</button></div></div></div></div>');
+            modal.appendTo($('body'));
+            this.$modal = modal;
+        },
+        show: function () {
+            var modal = this.$modal;
+            modal.modal({
+                backdrop: 'static',
+                show: true,
+                keyboard: false
+            });
+
+            var that = this;
+            modal.find('.btn-primary:contains("确认")').on('click', function () {
+                if (that.successFn)
+                    that.successFn();
+                else {
+                    var url = that.defaults.url;
+                    $.get(url).complete(that.doneFn);
+                }
+            });
+            modal.on('hidden.bs.modal', function () { this.remove(); });
+        }
+    };
+
 }));
